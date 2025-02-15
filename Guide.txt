@@ -1,0 +1,116 @@
+1. Environment Setup
+Python Version:
+Use Python 3.8 or later.
+
+Install Dependencies:
+Install the required packages:
+
+bash
+pip install cryptography msgpack
+(Other libraries such as socket, threading, and logging are part of the standard library.)
+
+Directory & Permissions:
+Place the script (for example, as messaging_app.py) in a dedicated folder. Ensure the folder is writable because the application creates several files (e.g. keystore.dat, message_log.dat, TLS certificate files, etc.).
+
+2. First Run & Keystore Creation
+Keystore Initialization:
+When you run the script for the first time, you’ll be prompted to create a strong passphrase (minimum 20 characters with a mix of uppercase, lowercase, numbers, and symbols). This passphrase encrypts your ephemeral keys.
+
+Special Passphrases:
+
+Typing 1234567890 at any prompt triggers a dead man’s switch (immediately wipes local data).
+Typing decoy9876 at startup loads decoy mode (shows fake log entries and hides your real data).
+3. Quick-Setup Wizard
+Run Quick-Setup:
+At the prompt, type:
+arduino
+Copy
+quick-setup
+Follow the wizard to:
+Select your role:
+fc: Field Client (no server thread if port is 0)
+fs: Field Server
+sa: Static Anchor Server
+Enter your display name and listening port.
+Certificate Generation:
+Depending on your role:
+Client: The wizard will generate a client TLS certificate and offer to export it (e.g. to USB as D:/my_client_cert.pem).
+Server: The wizard will generate a server certificate, allow importing client certificates from USB, and offer to export your server certificate.
+4. Key & Peer Trust Management
+Export Your Ephemeral Keys:
+Use the command:
+
+nginx
+getkeys
+(Password required: G3tP3m!!!)
+This exports your ephemeral X25519 and Ed25519 public keys to USB (files like D:/my_x25519_public.pem).
+
+Trust a Peer’s Keys:
+Use:
+
+cpp
+trust <peer_id> import
+After your peer exports their keys (to USB), they will be imported and stored in your trusted keys store.
+
+Bind a Peer’s Network Address:
+Use:
+
+php-template
+bind <peer_id> <ip:port>
+This maps a peer identifier to a network address for direct messaging.
+
+5. Messaging & File Operations
+Send a Message:
+To send an ephemeral encrypted message over TLS:
+
+php-template
+Copy
+send <peer_id> <message>
+The message is signed and encrypted using an ephemeral handshake.
+
+View & Manage Messages:
+
+Use list to display received messages.
+Use delete <message_id> to remove a message.
+Use purge to clear the entire log.
+File Encryption/Decryption:
+
+Encrypt a file for a peer:
+php-template
+encrypt-file <peer_id> <file_path>
+The file is overwritten with an encrypted payload.
+Decrypt the file with:
+php-template
+decrypt-file <file_path>
+6. Advanced Features
+Remote Wipe:
+Use:
+
+php-template
+remote-wipe <target_display_name>
+to instruct a peer to wipe its local data if trusted.
+
+Dummy Traffic:
+To send periodic cover messages, run:
+
+php-template
+dummy-traffic start <peer_id>
+Stop it with:
+
+arduino
+dummy-traffic stop
+7. Deployment & Running
+Run the Application:
+Make the script executable or run via:
+
+bash
+python3 messaging_app.py
+Service Deployment:
+For production servers (e.g., static anchors), consider running the script as a background service (using systemd, tmux, or screen) so that it continuously listens for TLS connections.
+
+Security Considerations:
+
+Ensure that certificate and keystore files are secured with proper file permissions.
+Regularly back up your keystore and configuration.
+Use the well-vetted cryptographic primitives provided by the Python cryptography library.
+Avoid “security by obscurity” – rely on established standards.
